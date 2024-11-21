@@ -24,7 +24,7 @@ while True:
     print('=======================================================================================')
     max_value = [0]
     callback = {
-        "setStatus": lambda text: print(text, end='r'),
+        "setStatus": lambda text: print(text, end='\n'),
         "setProgress": lambda value: printprogressbar(value, max_value[0]),
         "setMax": lambda value: maximum(max_value, value)
     }
