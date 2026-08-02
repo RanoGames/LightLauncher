@@ -1,94 +1,168 @@
-# -*- coding: utf-8 -*-
+from PyQt6 import QtCore, QtGui, QtWidgets
 
-################################################################################
-## Form generated from reading UI file 'untitled.ui'
-##
-## Created by: Qt User Interface Compiler version 6.8.0
-##
-## WARNING! All changes made in this file will be lost when recompiling UI file!
-################################################################################
-
-from PyQt6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
-    QMetaObject, QObject, QPoint, QRect,
-    QSize, QTime, QUrl, Qt)
-from PyQt6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
-    QFont, QFontDatabase, QGradient, QIcon,
-    QImage, QKeySequence, QLinearGradient, QPainter,
-    QPalette, QPixmap, QRadialGradient, QTransform)
-from PyQt6.QtWidgets import (QApplication, QLabel, QLineEdit, QMainWindow,
-    QMenuBar, QPushButton, QSizePolicy, QStatusBar,
-    QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
-        if not MainWindow.objectName():
-            MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(800, 600)
-        self.centralwidget = QWidget(MainWindow)
-        self.centralwidget.setObjectName(u"centralwidget")
-        self.PlayMinecraft = QPushButton(self.centralwidget)
-        self.PlayMinecraft.setObjectName(u"PlayMinecraft")
-        self.PlayMinecraft.setGeometry(QRect(550, 450, 161, 61))
-        font = QFont()
-        font.setFamilies([u"Microsoft Tai Le"])
+        MainWindow.setObjectName("MainWindow")
+        MainWindow.resize(735, 575)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
+        MainWindow.setSizePolicy(sizePolicy)
+        MainWindow.setMinimumSize(QtCore.QSize(735, 575))
+        MainWindow.setMaximumSize(QtCore.QSize(735, 575))
+
+        self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(12)
+        font.setBold(True)
+        self.centralwidget.setFont(font)
+
+        # Версия лаунчера (самый верх)
+        self.JavaInfoLabel = QtWidgets.QLabel(parent=self.centralwidget)
+        self.JavaInfoLabel.setGeometry(QtCore.QRect(0, 2, 735, 18))
+        self.JavaInfoLabel.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.JavaInfoLabel.setObjectName("JavaInfoLabel")
+
+        # Прогресс/сообщения
+        self.Progress = QtWidgets.QLabel(parent=self.centralwidget)
+        self.Progress.setGeometry(QtCore.QRect(0, 0, 735, 150))
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(18)
+        font.setBold(True)
+        self.Progress.setFont(font)
+        self.Progress.setText("")
+        self.Progress.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.Progress.setObjectName("Progress")
+
+        # Прогресс-бар установки (скрыт по умолчанию)
+        self.InstallProgressBar = QtWidgets.QProgressBar(parent=self.centralwidget)
+        self.InstallProgressBar.setGeometry(QtCore.QRect(210, 140, 325, 12))
+        self.InstallProgressBar.setValue(0)
+        self.InstallProgressBar.setTextVisible(False)
+        self.InstallProgressBar.setObjectName("InstallProgressBar")
+        self.InstallProgressBar.hide()
+
+        # --- Левая колонка ---
+
+        # Никнейм
+        self.NicknameLabel = QtWidgets.QLabel(parent=self.centralwidget)
+        self.NicknameLabel.setGeometry(QtCore.QRect(210, 365, 260, 20))
+        self.NicknameLabel.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.NicknameLabel.setObjectName("NicknameLabel")
+
+        self.Nickname = QtWidgets.QComboBox(parent=self.centralwidget)
+        self.Nickname.setEditable(True)
+        self.Nickname.setGeometry(QtCore.QRect(210, 395, 260, 70))
+        self.Nickname.setObjectName("Nickname")
+
+        # Крестик удаления ника (70x70 квадрат)
+        self.DeleteNicknameButton = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.DeleteNicknameButton.setGeometry(QtCore.QRect(475, 395, 70, 70))
+        font = QtGui.QFont()
         font.setPointSize(20)
         font.setBold(True)
-        self.PlayMinecraft.setFont(font)
-        self.Version = QLineEdit(self.centralwidget)
-        self.Version.setObjectName(u"Version")
-        self.Version.setGeometry(QRect(170, 430, 271, 81))
-        self.Version.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.DownLoadMinecraft = QPushButton(self.centralwidget)
-        self.DownLoadMinecraft.setObjectName(u"DownLoadMinecraft")
-        self.DownLoadMinecraft.setGeometry(QRect(550, 360, 161, 61))
-        self.DownLoadMinecraft.setFont(font)
-        self.Nickname = QLineEdit(self.centralwidget)
-        self.Nickname.setObjectName(u"Nickname")
-        self.Nickname.setGeometry(QRect(170, 280, 271, 81))
-        self.Nickname.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.NicknameLabel = QLabel(self.centralwidget)
-        self.NicknameLabel.setObjectName(u"NicknameLabel")
-        self.NicknameLabel.setGeometry(QRect(230, 250, 131, 16))
-        self.GameVersionLabel = QLabel(self.centralwidget)
-        self.GameVersionLabel.setObjectName(u"GameVersionLabel")
-        self.GameVersionLabel.setGeometry(QRect(220, 400, 131, 16))
-        self.Progress = QLabel(self.centralwidget)
-        self.Progress.setObjectName(u"Progress")
-        self.Progress.setGeometry(QRect(0, 100, 800, 150))
-        font1 = QFont()
-        font1.setPointSize(18)
-        self.Progress.setFont(font1)
-        self.Progress.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.DeleteNicknameButton.setFont(font)
+        self.DeleteNicknameButton.setObjectName("DeleteNicknameButton")
+
+        # Версия игры
+        self.GameVersionLabel = QtWidgets.QLabel(parent=self.centralwidget)
+        self.GameVersionLabel.setGeometry(QtCore.QRect(210, 475, 260, 20))
+        self.GameVersionLabel.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.GameVersionLabel.setObjectName("GameVersionLabel")
+
+        self.VersionComboBox = QtWidgets.QComboBox(parent=self.centralwidget)
+        self.VersionComboBox.setEditable(False)
+        self.VersionComboBox.setGeometry(QtCore.QRect(210, 495, 260, 70))
+        self.VersionComboBox.setObjectName("VersionComboBox")
+
+        # Кнопка обновить версии (70x70 квадрат)
+        self.RefreshVersionsButton = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.RefreshVersionsButton.setGeometry(QtCore.QRect(475, 495, 70, 70))
+        font = QtGui.QFont()
+        font.setPointSize(20)
+        font.setBold(True)
+        self.RefreshVersionsButton.setFont(font)
+        self.RefreshVersionsButton.setObjectName("RefreshVersionsButton")
+
+        # Кнопка "Открыть папку" (70x70)
+        self.FilesButton = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.FilesButton.setGeometry(QtCore.QRect(10, 495, 70, 70))
+        font = QtGui.QFont()
+        font.setPointSize(20)
+        font.setBold(True)
+        self.FilesButton.setFont(font)
+        self.FilesButton.setText("")
+        self.FilesButton.setObjectName("FilesButton")
+
+        # Кнопка GitHub (70x70)
+        self.GitHubButton = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.GitHubButton.setGeometry(QtCore.QRect(90, 495, 70, 70))
+        self.GitHubButton.setText("")
+        self.GitHubButton.setObjectName("GitHubButton")
+
+        # --- Правая колонка ---
+
+        # Кнопка "Настройки"
+        self.SettingsButton = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.SettingsButton.setGeometry(QtCore.QRect(550, 295, 175, 70))
+        self.SettingsButton.setObjectName("SettingsButton")
+
+        # Кнопка "Скачать"
+        self.DownLoadMinecraft = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.DownLoadMinecraft.setGeometry(QtCore.QRect(550, 395, 175, 70))
+        self.DownLoadMinecraft.setObjectName("DownLoadMinecraft")
+
+        # Кнопка "Играть"
+        self.PlayMinecraft = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.PlayMinecraft.setGeometry(QtCore.QRect(550, 495, 175, 70))
+        self.PlayMinecraft.setObjectName("PlayMinecraft")
+
+        # Кнопка "Удалить версию" (70x70)
+        self.DeleteVersionButton = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.DeleteVersionButton.setGeometry(QtCore.QRect(10, 415, 70, 70))
+        font = QtGui.QFont()
+        font.setPointSize(16)
+        font.setBold(True)
+        self.DeleteVersionButton.setFont(font)
+        self.DeleteVersionButton.setObjectName("DeleteVersionButton")
+
+        # Кнопка "Отмена установки" (скрыта по умолчанию)
+        self.CancelInstallButton = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.CancelInstallButton.setGeometry(QtCore.QRect(550, 395, 175, 70))
+        self.CancelInstallButton.setObjectName("CancelInstallButton")
+        self.CancelInstallButton.hide()
+
         MainWindow.setCentralWidget(self.centralwidget)
-        self.menubar = QMenuBar(MainWindow)
-        self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 800, 33))
+        self.menubar = QtWidgets.QMenuBar(parent=MainWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 735, 22))
         MainWindow.setMenuBar(self.menubar)
-        self.statusbar = QStatusBar(MainWindow)
-        self.statusbar.setObjectName(u"statusbar")
-        MainWindow.setStatusBar(self.statusbar)
 
         self.retranslateUi(MainWindow)
-
-        QMetaObject.connectSlotsByName(MainWindow)
-    # setupUi
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"TLSLanucher", None))
-        self.PlayMinecraft.setText(QCoreApplication.translate("MainWindow", u"\u0418\u0413\u0420\u0410\u0422\u042c", None))
-        self.DownLoadMinecraft.setText(QCoreApplication.translate("MainWindow", u"\u0421\u041a\u0410\u0427\u0410\u0422\u042c", None))
-#if QT_CONFIG(tooltip)
-        self.Nickname.setToolTip(QCoreApplication.translate("MainWindow", u"sdsad", None))
-#endif // QT_CONFIG(tooltip)
-#if QT_CONFIG(statustip)
-        self.Nickname.setStatusTip(QCoreApplication.translate("MainWindow", u"sds", None))
-#endif // QT_CONFIG(statustip)
-#if QT_CONFIG(whatsthis)
-        self.Nickname.setWhatsThis(QCoreApplication.translate("MainWindow", u"aaa", None))
-#endif // QT_CONFIG(whatsthis)
-        self.Nickname.setText("")
-        self.NicknameLabel.setText(QCoreApplication.translate("MainWindow", u"\u0418\u043c\u044f \u0438\u0433\u0440\u043e\u043a\u0430", None))
-        self.GameVersionLabel.setText(QCoreApplication.translate("MainWindow", u" \u0412\u0435\u0440\u0441\u0438\u044f \u0438\u0433\u0440\u044b", None))
-        self.Progress.setText("")
-    # retranslateUi
+        _translate = QtCore.QCoreApplication.translate
+        MainWindow.setWindowTitle(_translate("MainWindow", "LightLauncher"))
+        self.PlayMinecraft.setText(_translate("MainWindow", "ИГРАТЬ"))
+        self.DownLoadMinecraft.setText(_translate("MainWindow", "СКАЧАТЬ"))
+        self.SettingsButton.setText(_translate("MainWindow", "НАСТРОЙКИ"))
+        self.NicknameLabel.setText(_translate("MainWindow", "Имя игрока"))
+        self.GameVersionLabel.setText(_translate("MainWindow", " Версия игры"))
+        self.RefreshVersionsButton.setText(_translate("MainWindow", "\U0001f504"))
+        self.DeleteNicknameButton.setText(_translate("MainWindow", "\u2715"))
+        self.DeleteVersionButton.setText(_translate("MainWindow", "\U0001f5d1"))
+        self.CancelInstallButton.setText(_translate("MainWindow", "ОТМЕНА"))
 
+        # Тултипы
+        self.PlayMinecraft.setToolTip(_translate("MainWindow", "Запустить Minecraft"))
+        self.DownLoadMinecraft.setToolTip(_translate("MainWindow", "Скачать выбранную версию"))
+        self.SettingsButton.setToolTip(_translate("MainWindow", "Открыть настройки лаунчера"))
+        self.Nickname.setToolTip(_translate("MainWindow", "Введите или выберите никнейм"))
+        self.VersionComboBox.setToolTip(_translate("MainWindow", "Выберите версию Minecraft"))
+        self.RefreshVersionsButton.setToolTip(_translate("MainWindow", "Обновить список версий"))
+        self.FilesButton.setToolTip(_translate("MainWindow", "Открыть папку с игрой"))
+        self.GitHubButton.setToolTip(_translate("MainWindow", "Открыть GitHub проекта"))
+        self.DeleteNicknameButton.setToolTip(_translate("MainWindow", "Удалить ник из списка"))
+        self.DeleteVersionButton.setToolTip(_translate("MainWindow", "Удалить выбранную версию"))
+        self.CancelInstallButton.setToolTip(_translate("MainWindow", "Отменить установку"))
