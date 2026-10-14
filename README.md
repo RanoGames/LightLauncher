@@ -16,7 +16,7 @@
 ## Установка
 
 ```bash
-git clone https://github.com/your-username/LightLauncher.git
+git clone https://github.com/RanoGames/LightLauncher.git
 cd LightLauncher
 pip install -r requirements.txt
 ```
@@ -45,7 +45,7 @@ LightLauncher/
 ## Системные требования
 
 - Python 3.8+
-- Java (автоматически minecraft_launcher_lib.utils.get_java_executable)
+- Java (автоматически寻找.minecraft_launcher_lib.utils.get_java_executable)
 - ~200 МБ свободного места для установки Minecraft
 
 ## Лицензия
