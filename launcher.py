@@ -191,8 +191,11 @@ class Launcher(QMainWindow):
         self._launch_timer = QTimer(self)
         self._launch_timer.timeout.connect(self._update_launch_timer)
 
-        # Версия лаунчера
+        # Версия лаунчера (клик открывает changelog)
         self.ui.JavaInfoLabel.setText(f"v{LAUNCHER_VERSION}")
+        self.ui.JavaInfoLabel.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.ui.JavaInfoLabel.setToolTip("Нажмите, чтобы посмотреть список изменений (Changelog)")
+        self.ui.JavaInfoLabel.mousePressEvent = lambda event: self._show_changelog()
 
         # Обновления
         self._check_for_updates()
@@ -305,6 +308,12 @@ class Launcher(QMainWindow):
     def _on_update_available(self, version: str, body: str,
                              download_url: str) -> None:
         dialog = UpdateDialog(version, body, download_url, parent=self)
+        dialog.exec()
+
+    def _show_changelog(self) -> None:
+        """Открывает диалог со списком изменений текущей версии."""
+        from updater import ChangelogDialog
+        dialog = ChangelogDialog(parent=self, version=LAUNCHER_VERSION)
         dialog.exec()
 
     # ==============================================================
@@ -466,6 +475,23 @@ class Launcher(QMainWindow):
             self.ui.DeleteNicknameButton.setStyleSheet(mini_style)
             self.ui.RefreshVersionsButton.setStyleSheet(mini_style)
 
+            # Бейдж версии в левом верхнем углу (кликабельный)
+            self.ui.JavaInfoLabel.setStyleSheet("""
+                QLabel#JavaInfoLabel {
+                    background-color: rgba(18, 20, 26, 0.75);
+                    color: #b0b0b0;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 8px;
+                    font-size: 11px;
+                    font-weight: bold;
+                }
+                QLabel#JavaInfoLabel:hover {
+                    background-color: rgba(30, 35, 45, 0.95);
+                    color: #10b981;
+                    border: 1px solid rgba(16, 185, 129, 0.5);
+                }
+            """)
+
         else:
             style = """
                 QPushButton {
@@ -489,6 +515,20 @@ class Launcher(QMainWindow):
                 self.ui.CancelInstallButton, self.ui.InstallModloaderButton,
             ]:
                 btn.setStyleSheet(style)
+
+            # Бейдж версии в классической теме
+            self.ui.JavaInfoLabel.setStyleSheet("""
+                QLabel#JavaInfoLabel {
+                    color: #ffffff;
+                    background-color: rgba(0, 0, 0, 0.4);
+                    border-radius: 4px;
+                    font-weight: bold;
+                }
+                QLabel#JavaInfoLabel:hover {
+                    color: #10b981;
+                    background-color: rgba(0, 0, 0, 0.6);
+                }
+            """)
 
     # ==============================================================
     # Локализация

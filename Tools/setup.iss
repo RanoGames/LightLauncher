@@ -1,6 +1,6 @@
 [Setup]
 AppName=LightLauncher
-AppVersion=0.5
+AppVersion=0.50
 AppPublisher=RanoGames
 DefaultDirName={autopf}\LightLauncher
 DefaultGroupName=LightLauncher
