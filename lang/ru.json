@@ -45,6 +45,7 @@
     "old_betas": "Старые беты",
     "old_alphas": "Старые альфы",
     "additional": "Дополнительно:",
+    "auto_check_updates": "Автоматически проверять обновления",
     "show_console": "Показывать консоль отладки Minecraft",
     "validate_nickname": "Проверять корректность никнейма",
     "memory": "Память (RAM):",
