@@ -1,12 +1,12 @@
 [Setup]
 AppName=LightLauncher
-AppVersion=0.50
+AppVersion=0.51
 AppPublisher=RanoGames
 DefaultDirName={autopf}\LightLauncher
 DefaultGroupName=LightLauncher
 SourceDir=..
 OutputDir=installer_output
-OutputBaseFilename=LightLauncher-setup-v0.5
+OutputBaseFilename=LightLauncher-setup-v0.51
 SetupIconFile=mclovin.ico
 Compression=lzma2/ultra64
 SolidCompression=yes
