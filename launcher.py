@@ -145,7 +145,7 @@ class Launcher(QMainWindow):
         self.ui.DownLoadMinecraft.clicked.connect(self.installmc)
         self.ui.FilesButton.clicked.connect(self.open_game_directory)
         self.ui.GitHubButton.clicked.connect(self.open_github)
-        self.ui.VersionComboBox.activated.connect(self._on_version_changed)
+        self.ui.VersionComboBox.currentIndexChanged.connect(self._on_version_changed)
         self.ui.RefreshVersionsButton.clicked.connect(self.force_refresh_versions)
         self.ui.DeleteNicknameButton.clicked.connect(self._delete_current_nickname)
         self.ui.DeleteVersionButton.clicked.connect(self._delete_version)
@@ -199,6 +199,9 @@ class Launcher(QMainWindow):
 
         # Обновления
         self._check_for_updates()
+
+        # Первичное состояние кнопок Играть / Скачать
+        self._update_action_button()
 
     # ==============================================================
     # Инициализация UI
@@ -698,18 +701,61 @@ class Launcher(QMainWindow):
     # Версии
     # ==============================================================
 
-    def _on_version_changed(self, index: int) -> None:
-        version = self.ui.VersionComboBox.currentData()
+    def _is_version_installed(self, version: str | None = None) -> bool:
+        """Проверяет, установлена ли указанная версия Minecraft локально."""
         if not version:
+            version = self.ui.VersionComboBox.currentData() or self.last_version
+        if not version or version == t("loading", self._lang):
+            return False
+        version_dir = os.path.join(MINECRAFT_DIRECTORY, "versions", version)
+        if not os.path.isdir(version_dir):
+            return False
+        has_json = os.path.isfile(os.path.join(version_dir, f"{version}.json"))
+        has_jar = os.path.isfile(os.path.join(version_dir, f"{version}.jar"))
+        return has_json or has_jar
+
+    def _update_action_button(self) -> None:
+        """Обновляет видимость и состояние кнопок Играть / Скачать в зависимости от версии."""
+        if hasattr(self, "install_thread") and self.install_thread and self.install_thread.isRunning():
+            return
+
+        version = self.ui.VersionComboBox.currentData() or self.last_version
+        installed = self._is_version_installed(version)
+
+        if self.ui_theme == "modern":
+            self.ui.CancelInstallButton.hide()
+            if installed:
+                self.ui.DownLoadMinecraft.hide()
+                self.ui.PlayMinecraft.show()
+                self.ui.PlayMinecraft.setEnabled(True)
+                self.ui.PlayMinecraft.raise_()
+            else:
+                self.ui.PlayMinecraft.hide()
+                self.ui.DownLoadMinecraft.show()
+                self.ui.DownLoadMinecraft.setEnabled(True)
+                self.ui.DownLoadMinecraft.raise_()
+        else:
+            self.ui.CancelInstallButton.hide()
+            self.ui.DownLoadMinecraft.show()
+            self.ui.PlayMinecraft.show()
+            self.ui.PlayMinecraft.setEnabled(installed)
+            self.ui.DownLoadMinecraft.setEnabled(True)
+
+    def _on_version_changed(self, index: int = -1) -> None:
+        version = self.ui.VersionComboBox.currentData()
+        if not version or version == t("loading", self._lang):
             return
         self.last_version = version
         self.save_settings()
         self._detect_java()
+        self._update_action_button()
 
     def load_versions(self, force_refresh: bool = False) -> None:
+        self.ui.VersionComboBox.blockSignals(True)
         self.ui.VersionComboBox.clear()
         self.ui.VersionComboBox.addItem(t("loading", self._lang))
         self.ui.VersionComboBox.setEnabled(False)
+        self.ui.VersionComboBox.blockSignals(False)
         self.ver_loader = VersionLoader(
             filters=self.version_filters, force_refresh=force_refresh,
         )
@@ -721,6 +767,7 @@ class Launcher(QMainWindow):
         self.load_versions(force_refresh=True)
 
     def populate_versions(self, versions: list[str]) -> None:
+        self.ui.VersionComboBox.blockSignals(True)
         self.ui.VersionComboBox.clear()
 
         installed = set()
@@ -783,7 +830,10 @@ class Launcher(QMainWindow):
         else:
             self.ui.VersionComboBox.setCurrentIndex(0)
 
+        self.ui.VersionComboBox.blockSignals(False)
+
         self._detect_java()
+        self._update_action_button()
 
     def _open_mod_hub_dialog(self) -> None:
         version = self.ui.VersionComboBox.currentData()
@@ -1318,16 +1368,15 @@ class Launcher(QMainWindow):
         self.ui.InstallProgressBar.setRange(0, 0)
         self.ui.InstallProgressBar.show()
         self.ui.DownLoadMinecraft.hide()
+        self.ui.PlayMinecraft.hide()
         self.ui.CancelInstallButton.show()
-        self.ui.PlayMinecraft.setEnabled(False)
+        self.ui.CancelInstallButton.raise_()
 
         self.install_thread = InstallThread(version)
         self.install_thread.update_status.connect(self.ui.Progress.setText)
         self.install_thread.update_progress.connect(self._on_install_progress)
         self.install_thread.install_finished.connect(self.on_install_finished)
-        self.install_thread.error.connect(
-            lambda e: self.show_error(f"{t('install_err', L)} {e}")
-        )
+        self.install_thread.error.connect(self._on_install_error)
         self.install_thread.start()
 
     def _on_install_progress(self, value: int) -> None:
@@ -1342,17 +1391,23 @@ class Launcher(QMainWindow):
         version = self.ui.VersionComboBox.currentData()
         self._animate_text_change(self.ui.Progress, t("install_done", L))
         self.ui.InstallProgressBar.hide()
-        self.ui.DownLoadMinecraft.show()
         self.ui.CancelInstallButton.hide()
-        self.ui.PlayMinecraft.setEnabled(True)
 
         self._show_notification(
             "LightLauncher", f"{t('install_done', L)} — {version}"
         )
 
-        self.load_versions(force_refresh=False)
         if version:
             self.last_version = version
+
+        self.load_versions(force_refresh=False)
+        self._update_action_button()
+
+    def _on_install_error(self, err: str) -> None:
+        self.ui.InstallProgressBar.hide()
+        self.ui.CancelInstallButton.hide()
+        self._update_action_button()
+        self.show_error(f"{t('install_err', self._lang)} {err}")
 
     def _cancel_install(self) -> None:
         if self.install_thread and self.install_thread.isRunning():
@@ -1365,10 +1420,8 @@ class Launcher(QMainWindow):
             except Exception:
                 pass
             self.ui.InstallProgressBar.hide()
-            self.ui.DownLoadMinecraft.setEnabled(True)
-            self.ui.PlayMinecraft.setEnabled(True)
             self.ui.CancelInstallButton.hide()
-            self.ui.DownLoadMinecraft.show()
+            self._update_action_button()
             self._animate_text_change(
                 self.ui.Progress, t("install_cancelled", self._lang)
             )
@@ -1407,6 +1460,7 @@ class Launcher(QMainWindow):
                     self.last_version = None
                     self.save_settings()
                 self.load_versions(force_refresh=False)
+                self._update_action_button()
             except Exception as e:
                 self.show_error(f"{t('delete_err', L)} {e}")
 
