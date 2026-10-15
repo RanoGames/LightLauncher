@@ -1,12 +1,12 @@
 [Setup]
 AppName=LightLauncher
-AppVersion=0.51
+AppVersion=0.52
 AppPublisher=RanoGames
 DefaultDirName={autopf}\LightLauncher
 DefaultGroupName=LightLauncher
 SourceDir=..
 OutputDir=installer_output
-OutputBaseFilename=LightLauncher-setup-v0.51
+OutputBaseFilename=LightLauncher-setup-v0.52
 SetupIconFile=mclovin.ico
 Compression=lzma2/ultra64
 SolidCompression=yes
@@ -29,6 +29,7 @@ Source: "folder.png"; DestDir: "{app}"; Flags: ignoreversion
 Source: "github.png"; DestDir: "{app}"; Flags: ignoreversion
 Source: "background.png"; DestDir: "{app}"; Flags: ignoreversion
 Source: "lang\*"; DestDir: "{app}\lang"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "Backgrounds\*"; DestDir: "{app}\Backgrounds"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{group}\LightLauncher"; Filename: "{app}\LightLauncher.exe"; WorkingDir: "{app}"
