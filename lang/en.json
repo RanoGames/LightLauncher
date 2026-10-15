@@ -45,6 +45,7 @@
     "old_betas": "Old betas",
     "old_alphas": "Old alphas",
     "additional": "Additional:",
+    "auto_check_updates": "Check for updates automatically",
     "show_console": "Show Minecraft debug console",
     "validate_nickname": "Validate nickname",
     "memory": "Memory (RAM):",
