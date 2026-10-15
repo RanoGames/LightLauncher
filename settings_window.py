@@ -53,7 +53,7 @@ class SettingsWindow(QDialog):
         custom_background: str | None = None,
         ely_by_skins: bool = True,
         current_version: str | None = None,
-        ui_theme: str = "modern",
+        auto_check_updates: bool = True,
     ) -> None:
         super().__init__(parent)
         L = current_lang if current_lang != "auto" else get_system_lang()
@@ -63,7 +63,6 @@ class SettingsWindow(QDialog):
         self._lang = current_lang
         self.current_version = current_version
         self.custom_bg_path = custom_background
-        self.ui_theme = ui_theme
 
         icon_path = resource_path("mclovin.ico")
         if os.path.exists(icon_path):
@@ -101,16 +100,6 @@ class SettingsWindow(QDialog):
             self.lang_combo.setCurrentIndex(idx)
         self.lang_combo.currentIndexChanged.connect(self._on_lang_changed)
         gen_layout.addWidget(self.lang_combo)
-
-        # Стиль интерфейса
-        gen_layout.addWidget(QLabel(f"<b>{t('ui_theme', L)}</b>"))
-        self.theme_combo = QComboBox()
-        self.theme_combo.addItem(t("theme_modern", L), "modern")
-        self.theme_combo.addItem(t("theme_classic", L), "classic")
-        idx_t = self.theme_combo.findData(ui_theme)
-        if idx_t >= 0:
-            self.theme_combo.setCurrentIndex(idx_t)
-        gen_layout.addWidget(self.theme_combo)
 
         # Свой фон
         gen_layout.addWidget(QLabel(f"<b>{t('custom_background', L)}</b>"))
@@ -262,6 +251,10 @@ class SettingsWindow(QDialog):
         adv_layout.addWidget(self.old_alpha_cb)
 
         adv_layout.addWidget(QLabel(f"<b>{t('additional', L)}</b>"))
+        self.auto_check_updates_cb = QCheckBox(t("auto_check_updates", L))
+        self.auto_check_updates_cb.setChecked(auto_check_updates)
+        adv_layout.addWidget(self.auto_check_updates_cb)
+
         self.console_cb = QCheckBox(t("show_console", L))
         self.console_cb.setChecked(show_console)
         adv_layout.addWidget(self.console_cb)
@@ -597,5 +590,5 @@ class SettingsWindow(QDialog):
             "resolution_height": self.res_h.value(),
             "custom_background": self.custom_bg_path,
             "ely_by_skins": self.ely_skins_cb.isChecked(),
-            "ui_theme": self.theme_combo.currentData(),
+            "auto_check_updates": self.auto_check_updates_cb.isChecked(),
         }
