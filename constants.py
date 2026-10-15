@@ -29,9 +29,10 @@ DEFAULT_SETTINGS: dict = {
     "resolution_height": 1080,
     "custom_background": None,
     "ely_by_skins": True,
-    "ui_theme": "modern"
+    "ui_theme": "modern",
+    "auto_check_updates": True,
 }
 
 DISCORD_CLIENT_ID: str = "1420709615468810403"
-LAUNCHER_VERSION: str = "0.51"
+LAUNCHER_VERSION: str = "0.52"
 
