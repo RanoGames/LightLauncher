@@ -19,7 +19,6 @@ from PyQt6.QtCore import (
     QEasingCurve,
     QProcess,
     QPropertyAnimation,
-    QSize,
     Qt,
     QTimer,
 )
@@ -31,7 +30,6 @@ from PyQt6.QtWidgets import (
     QMainWindow,
     QMenu,
     QMessageBox,
-    QPushButton,
     QSystemTrayIcon,
     QTabWidget,
     QVBoxLayout,
@@ -47,7 +45,7 @@ from constants import (
     SETTINGS_FILE,
 )
 from crash_analyzer import analyze_latest_crash
-from design import Ui_MainWindowClassic, Ui_MainWindowModern
+from design import Ui_MainWindowModern
 from discord_rpc import DiscordRPC
 from java_downloader import JavaDownloadDialog
 from java_manager import (
@@ -98,29 +96,17 @@ class Launcher(QMainWindow):
         self.load_settings()
         self._lang = resolve_lang(self._lang_setting)
 
-        # Выбор темы оформления
-        if self.ui_theme == "classic":
-            self.ui = Ui_MainWindowClassic()
-        else:
-            self.ui = Ui_MainWindowModern()
+        # Современный интерфейс (Modern Glassmorphism)
+        self.ui = Ui_MainWindowModern()
         self.ui.setupUi(self)
 
         # Заменяем комбобоксы на ClickComboBox
         self._replace_comboboxes()
 
-        # Кнопка модов (+MOD): создаём, если отсутствует в UI (в classic)
-        if not hasattr(self.ui, "InstallModloaderButton"):
-            self.ui.InstallModloaderButton = QPushButton(parent=self.ui.centralwidget)
-            self.ui.InstallModloaderButton.setGeometry(90, 415, 70, 70)
-            font = QtGui.QFont()
-            font.setPointSize(13)
-            font.setBold(True)
-            self.ui.InstallModloaderButton.setFont(font)
-            self.ui.InstallModloaderButton.setText("+MOD")
-            self.ui.InstallModloaderButton.setObjectName("InstallModloaderButton")
+        # Кнопка модов
         self.ui.InstallModloaderButton.clicked.connect(self._open_mod_hub_dialog)
 
-        # Иконки по абсолютному пути
+        # Иконки
         self._setup_icons()
 
         # Стили кнопок
@@ -198,7 +184,8 @@ class Launcher(QMainWindow):
         self.ui.JavaInfoLabel.mousePressEvent = lambda event: self._show_changelog()
 
         # Обновления
-        self._check_for_updates()
+        if self.auto_check_updates:
+            self._check_for_updates()
 
         # Первичное состояние кнопок Играть / Скачать
         self._update_action_button()
@@ -209,7 +196,6 @@ class Launcher(QMainWindow):
 
     def _replace_comboboxes(self) -> None:
         """Заменяет дизайнерские QComboBox на ClickComboBox."""
-        is_modern = (self.ui_theme == "modern")
         for attr, editable in [("Nickname", True), ("VersionComboBox", False)]:
             old = getattr(self.ui, attr)
             parent = old.parentWidget() or self
@@ -217,52 +203,45 @@ class Launcher(QMainWindow):
             new.setEditable(editable)
             new.setGeometry(old.geometry())
             new.setObjectName(old.objectName())
-            if is_modern:
-                new.setFont(QtGui.QFont("Segoe UI", 11, QtGui.QFont.Weight.Bold))
-                new.setStyleSheet("""
-                    QComboBox {
-                        background-color: rgba(255, 255, 255, 18);
-                        border: 1px solid rgba(255, 255, 255, 35);
-                        border-radius: 10px;
-                        color: #ffffff;
-                        padding-left: 10px;
-                        padding-right: 25px;
-                        font-family: 'Segoe UI', sans-serif;
-                        font-weight: 600;
-                        font-size: 13px;
-                    }
-                    QComboBox:hover {
-                        background-color: rgba(255, 255, 255, 28);
-                        border: 1px solid rgba(255, 255, 255, 60);
-                    }
-                    QComboBox::drop-down {
-                        border: none;
-                        width: 24px;
-                    }
-                    QComboBox QAbstractItemView {
-                        background-color: #1a1e29;
-                        color: #ffffff;
-                        selection-background-color: #3b82f6;
-                        border: 1px solid rgba(255, 255, 255, 30);
-                        border-radius: 8px;
-                        outline: none;
-                        padding: 4px;
-                    }
-                    QLineEdit {
-                        color: #ffffff;
-                        background: transparent;
-                        border: none;
-                        font-family: 'Segoe UI', sans-serif;
-                        font-weight: 600;
-                        font-size: 13px;
-                    }
-                """)
-            else:
-                new.setFont(QtGui.QFont("Arial", 12, QtGui.QFont.Weight.Bold))
-                new.setStyleSheet(
-                    "QComboBox { font: bold 12pt Arial; } "
-                    "QComboBox QAbstractItemView { font: bold 12pt Arial; }"
-                )
+            new.setFont(QtGui.QFont("Segoe UI", 11, QtGui.QFont.Weight.Bold))
+            new.setStyleSheet("""
+                QComboBox {
+                    background-color: rgba(255, 255, 255, 18);
+                    border: 1px solid rgba(255, 255, 255, 35);
+                    border-radius: 10px;
+                    color: #ffffff;
+                    padding-left: 10px;
+                    padding-right: 25px;
+                    font-family: 'Segoe UI', sans-serif;
+                    font-weight: 600;
+                    font-size: 13px;
+                }
+                QComboBox:hover {
+                    background-color: rgba(255, 255, 255, 28);
+                    border: 1px solid rgba(255, 255, 255, 60);
+                }
+                QComboBox::drop-down {
+                    border: none;
+                    width: 24px;
+                }
+                QComboBox QAbstractItemView {
+                    background-color: #1a1e29;
+                    color: #ffffff;
+                    selection-background-color: #3b82f6;
+                    border: 1px solid rgba(255, 255, 255, 30);
+                    border-radius: 8px;
+                    outline: none;
+                    padding: 4px;
+                }
+                QLineEdit {
+                    color: #ffffff;
+                    background: transparent;
+                    border: none;
+                    font-family: 'Segoe UI', sans-serif;
+                    font-weight: 600;
+                    font-size: 13px;
+                }
+            """)
             new.show()
             old.deleteLater()
             setattr(self.ui, attr, new)
@@ -271,22 +250,6 @@ class Launcher(QMainWindow):
         icon = resource_path("mclovin.ico")
         if os.path.exists(icon):
             self.setWindowIcon(QIcon(icon))
-
-        # Для классического стиля устанавливаем иконки из файлов на квадратные кнопки
-        if self.ui_theme == "classic":
-            folder = resource_path("folder.png")
-            if os.path.exists(folder):
-                self.ui.FilesButton.setIcon(QIcon(folder))
-                self.ui.FilesButton.setIconSize(QSize(40, 40))
-            else:
-                self.ui.FilesButton.setText("\U0001f4c2")
-
-            github = resource_path("github.png")
-            if os.path.exists(github):
-                self.ui.GitHubButton.setIcon(QIcon(github))
-                self.ui.GitHubButton.setIconSize(QSize(40, 40))
-            else:
-                self.ui.GitHubButton.setText("GitHub")
 
     # ==============================================================
     # Event filter
@@ -373,165 +336,126 @@ class Launcher(QMainWindow):
     # ==============================================================
 
     def _apply_button_transparency(self) -> None:
-        if self.ui_theme == "modern":
-            # Геройские кнопки: Играть, Скачать, Отмена
-            self.ui.PlayMinecraft.setStyleSheet("""
-                QPushButton#PlayMinecraft {
-                    background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #10b981, stop:1 #059669);
-                    border: 1px solid rgba(255, 255, 255, 0.25);
-                    border-radius: 12px;
-                    color: #ffffff;
-                    font-weight: bold;
-                    font-size: 15px;
-                }
-                QPushButton#PlayMinecraft:hover {
-                    background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #34d399, stop:1 #10b981);
-                    border-color: rgba(255, 255, 255, 0.45);
-                }
-                QPushButton#PlayMinecraft:pressed {
-                    background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #059669, stop:1 #047857);
-                }
-            """)
-            self.ui.DownLoadMinecraft.setStyleSheet("""
-                QPushButton#DownLoadMinecraft {
-                    background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #3b82f6, stop:1 #2563eb);
-                    border: 1px solid rgba(255, 255, 255, 0.25);
-                    border-radius: 12px;
-                    color: #ffffff;
-                    font-weight: bold;
-                    font-size: 15px;
-                }
-                QPushButton#DownLoadMinecraft:hover {
-                    background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #60a5fa, stop:1 #3b82f6);
-                    border-color: rgba(255, 255, 255, 0.45);
-                }
-                QPushButton#DownLoadMinecraft:pressed {
-                    background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #2563eb, stop:1 #1d4ed8);
-                }
-            """)
-            self.ui.CancelInstallButton.setStyleSheet("""
-                QPushButton#CancelInstallButton {
-                    background-color: rgba(239, 68, 68, 0.85);
-                    border: 1px solid rgba(255, 255, 255, 0.25);
-                    border-radius: 12px;
-                    color: #ffffff;
-                    font-weight: bold;
-                    font-size: 14px;
-                }
-                QPushButton#CancelInstallButton:hover {
-                    background-color: rgba(239, 68, 68, 1.0);
-                }
-                QPushButton#CancelInstallButton:pressed {
-                    background-color: rgba(185, 28, 28, 1.0);
-                }
-            """)
+        # Геройские кнопки: Играть, Скачать, Отмена
+        self.ui.PlayMinecraft.setStyleSheet("""
+            QPushButton#PlayMinecraft {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #10b981, stop:1 #059669);
+                border: 1px solid rgba(255, 255, 255, 0.25);
+                border-radius: 12px;
+                color: #ffffff;
+                font-weight: bold;
+                font-size: 15px;
+            }
+            QPushButton#PlayMinecraft:hover {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #34d399, stop:1 #10b981);
+                border-color: rgba(255, 255, 255, 0.45);
+            }
+            QPushButton#PlayMinecraft:pressed {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #059669, stop:1 #047857);
+            }
+        """)
+        self.ui.DownLoadMinecraft.setStyleSheet("""
+            QPushButton#DownLoadMinecraft {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #3b82f6, stop:1 #2563eb);
+                border: 1px solid rgba(255, 255, 255, 0.25);
+                border-radius: 12px;
+                color: #ffffff;
+                font-weight: bold;
+                font-size: 15px;
+            }
+            QPushButton#DownLoadMinecraft:hover {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #60a5fa, stop:1 #3b82f6);
+                border-color: rgba(255, 255, 255, 0.45);
+            }
+            QPushButton#DownLoadMinecraft:pressed {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #2563eb, stop:1 #1d4ed8);
+            }
+        """)
+        self.ui.CancelInstallButton.setStyleSheet("""
+            QPushButton#CancelInstallButton {
+                background-color: rgba(239, 68, 68, 0.85);
+                border: 1px solid rgba(255, 255, 255, 0.25);
+                border-radius: 12px;
+                color: #ffffff;
+                font-weight: bold;
+                font-size: 14px;
+            }
+            QPushButton#CancelInstallButton:hover {
+                background-color: rgba(239, 68, 68, 1.0);
+            }
+            QPushButton#CancelInstallButton:pressed {
+                background-color: rgba(185, 28, 28, 1.0);
+            }
+        """)
 
-            # Кнопки быстрых действий (пилюли)
-            pill_style = """
-                QPushButton {
-                    background-color: rgba(255, 255, 255, 14);
-                    border: 1px solid rgba(255, 255, 255, 28);
-                    border-radius: 10px;
-                    color: #e2e8f0;
-                    font-family: 'Segoe UI', sans-serif;
-                    font-size: 13px;
-                    font-weight: 600;
-                }
-                QPushButton:hover {
-                    background-color: rgba(255, 255, 255, 28);
-                    border-color: rgba(255, 255, 255, 55);
-                    color: #ffffff;
-                }
-                QPushButton:pressed {
-                    background-color: rgba(255, 255, 255, 45);
-                }
-            """
-            for btn in [
-                self.ui.SettingsButton,
-                self.ui.InstallModloaderButton,
-                self.ui.FilesButton,
-                self.ui.DeleteVersionButton,
-                self.ui.GitHubButton,
-            ]:
-                btn.setStyleSheet(pill_style)
+        # Кнопки быстрых действий (пилюли)
+        pill_style = """
+            QPushButton {
+                background-color: rgba(255, 255, 255, 14);
+                border: 1px solid rgba(255, 255, 255, 28);
+                border-radius: 10px;
+                color: #e2e8f0;
+                font-family: 'Segoe UI', sans-serif;
+                font-size: 13px;
+                font-weight: 600;
+            }
+            QPushButton:hover {
+                background-color: rgba(255, 255, 255, 28);
+                border-color: rgba(255, 255, 255, 55);
+                color: #ffffff;
+            }
+            QPushButton:pressed {
+                background-color: rgba(255, 255, 255, 45);
+            }
+        """
+        for btn in [
+            self.ui.SettingsButton,
+            self.ui.InstallModloaderButton,
+            self.ui.FilesButton,
+            self.ui.DeleteVersionButton,
+            self.ui.GitHubButton,
+        ]:
+            btn.setStyleSheet(pill_style)
 
-            # Маленькие вспомогательные кнопки
-            mini_style = """
-                QPushButton {
-                    background-color: rgba(255, 255, 255, 14);
-                    border: 1px solid rgba(255, 255, 255, 28);
-                    border-radius: 8px;
-                    color: #cbd5e1;
-                    font-family: 'Segoe UI', sans-serif;
-                    font-size: 14px;
-                    font-weight: bold;
-                }
-                QPushButton:hover {
-                    background-color: rgba(255, 255, 255, 30);
-                    border-color: rgba(255, 255, 255, 60);
-                    color: #ffffff;
-                }
-                QPushButton:pressed {
-                    background-color: rgba(255, 255, 255, 50);
-                }
-            """
-            self.ui.DeleteNicknameButton.setStyleSheet(mini_style)
-            self.ui.RefreshVersionsButton.setStyleSheet(mini_style)
+        # Маленькие вспомогательные кнопки
+        mini_style = """
+            QPushButton {
+                background-color: rgba(255, 255, 255, 14);
+                border: 1px solid rgba(255, 255, 255, 28);
+                border-radius: 8px;
+                color: #cbd5e1;
+                font-family: 'Segoe UI', sans-serif;
+                font-size: 14px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: rgba(255, 255, 255, 30);
+                border-color: rgba(255, 255, 255, 60);
+                color: #ffffff;
+            }
+            QPushButton:pressed {
+                background-color: rgba(255, 255, 255, 50);
+            }
+        """
+        self.ui.DeleteNicknameButton.setStyleSheet(mini_style)
+        self.ui.RefreshVersionsButton.setStyleSheet(mini_style)
 
-            # Бейдж версии в левом верхнем углу (кликабельный)
-            self.ui.JavaInfoLabel.setStyleSheet("""
-                QLabel#JavaInfoLabel {
-                    background-color: rgba(18, 20, 26, 0.75);
-                    color: #b0b0b0;
-                    border: 1px solid rgba(255, 255, 255, 0.1);
-                    border-radius: 8px;
-                    font-size: 11px;
-                    font-weight: bold;
-                }
-                QLabel#JavaInfoLabel:hover {
-                    background-color: rgba(30, 35, 45, 0.95);
-                    color: #10b981;
-                    border: 1px solid rgba(16, 185, 129, 0.5);
-                }
-            """)
-
-        else:
-            style = """
-                QPushButton {
-                    background-color: rgba(0, 0, 0, 80);
-                    border: none;
-                    border-radius: 8px;
-                    color: white;
-                }
-                QPushButton:hover {
-                    background-color: rgba(0, 0, 0, 140);
-                }
-                QPushButton:pressed {
-                    background-color: rgba(0, 0, 0, 180);
-                }
-            """
-            for btn in [
-                self.ui.SettingsButton, self.ui.DownLoadMinecraft,
-                self.ui.PlayMinecraft, self.ui.RefreshVersionsButton,
-                self.ui.FilesButton, self.ui.GitHubButton,
-                self.ui.DeleteNicknameButton, self.ui.DeleteVersionButton,
-                self.ui.CancelInstallButton, self.ui.InstallModloaderButton,
-            ]:
-                btn.setStyleSheet(style)
-
-            # Бейдж версии в классической теме
-            self.ui.JavaInfoLabel.setStyleSheet("""
-                QLabel#JavaInfoLabel {
-                    color: #ffffff;
-                    background-color: rgba(0, 0, 0, 0.4);
-                    border-radius: 4px;
-                    font-weight: bold;
-                }
-                QLabel#JavaInfoLabel:hover {
-                    color: #10b981;
-                    background-color: rgba(0, 0, 0, 0.6);
-                }
-            """)
+        # Бейдж версии в левом верхнем углу (кликабельный)
+        self.ui.JavaInfoLabel.setStyleSheet("""
+            QLabel#JavaInfoLabel {
+                background-color: rgba(18, 20, 26, 0.75);
+                color: #b0b0b0;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 8px;
+                font-size: 11px;
+                font-weight: bold;
+            }
+            QLabel#JavaInfoLabel:hover {
+                background-color: rgba(30, 35, 45, 0.95);
+                color: #10b981;
+                border: 1px solid rgba(16, 185, 129, 0.5);
+            }
+        """)
 
     # ==============================================================
     # Локализация
@@ -539,21 +463,13 @@ class Launcher(QMainWindow):
 
     def _apply_language(self) -> None:
         L = self._lang
-        is_modern = (self.ui_theme == "modern")
-        if is_modern:
-            self.ui.PlayMinecraft.setText("▶ " + t("play", L))
-            self.ui.DownLoadMinecraft.setText("⬇ " + t("download", L))
-            self.ui.SettingsButton.setText("⚙ " + t("settings", L))
-            self.ui.InstallModloaderButton.setText("🧩 " + t("mods_btn", L))
-            self.ui.FilesButton.setText("📁 " + t("folder_btn", L))
-            self.ui.DeleteVersionButton.setText("🗑 " + t("delete_btn", L))
-            self.ui.GitHubButton.setText("🐙 GitHub")
-        else:
-            self.ui.PlayMinecraft.setText(t("play", L))
-            self.ui.DownLoadMinecraft.setText(t("download", L))
-            self.ui.SettingsButton.setText(t("settings", L))
-            self.ui.InstallModloaderButton.setText("+MOD")
-            self.ui.DeleteVersionButton.setText("\U0001f5d1")
+        self.ui.PlayMinecraft.setText("▶ " + t("play", L))
+        self.ui.DownLoadMinecraft.setText("⬇ " + t("download", L))
+        self.ui.SettingsButton.setText("⚙ " + t("settings", L))
+        self.ui.InstallModloaderButton.setText("🧩 " + t("mods_btn", L))
+        self.ui.FilesButton.setText("📁 " + t("folder_btn", L))
+        self.ui.DeleteVersionButton.setText("🗑 " + t("delete_btn", L))
+        self.ui.GitHubButton.setText("🐙 GitHub")
         self.ui.NicknameLabel.setText(t("nickname_label", L))
         self.ui.GameVersionLabel.setText(t("version_label", L))
         self.ui.CancelInstallButton.setText(t("cancel", L))
@@ -722,24 +638,17 @@ class Launcher(QMainWindow):
         version = self.ui.VersionComboBox.currentData() or self.last_version
         installed = self._is_version_installed(version)
 
-        if self.ui_theme == "modern":
-            self.ui.CancelInstallButton.hide()
-            if installed:
-                self.ui.DownLoadMinecraft.hide()
-                self.ui.PlayMinecraft.show()
-                self.ui.PlayMinecraft.setEnabled(True)
-                self.ui.PlayMinecraft.raise_()
-            else:
-                self.ui.PlayMinecraft.hide()
-                self.ui.DownLoadMinecraft.show()
-                self.ui.DownLoadMinecraft.setEnabled(True)
-                self.ui.DownLoadMinecraft.raise_()
-        else:
-            self.ui.CancelInstallButton.hide()
-            self.ui.DownLoadMinecraft.show()
+        self.ui.CancelInstallButton.hide()
+        if installed:
+            self.ui.DownLoadMinecraft.hide()
             self.ui.PlayMinecraft.show()
-            self.ui.PlayMinecraft.setEnabled(installed)
+            self.ui.PlayMinecraft.setEnabled(True)
+            self.ui.PlayMinecraft.raise_()
+        else:
+            self.ui.PlayMinecraft.hide()
+            self.ui.DownLoadMinecraft.show()
             self.ui.DownLoadMinecraft.setEnabled(True)
+            self.ui.DownLoadMinecraft.raise_()
 
     def _on_version_changed(self, index: int = -1) -> None:
         version = self.ui.VersionComboBox.currentData()
@@ -919,7 +828,9 @@ class Launcher(QMainWindow):
                 )
                 self.custom_background = data.get("custom_background", DEFAULT_SETTINGS["custom_background"])
                 self.ely_by_skins = data.get("ely_by_skins", DEFAULT_SETTINGS["ely_by_skins"])
-                self.ui_theme = data.get("ui_theme", DEFAULT_SETTINGS["ui_theme"])
+                self.auto_check_updates = data.get(
+                    "auto_check_updates", DEFAULT_SETTINGS["auto_check_updates"]
+                )
             except Exception:
                 logger.warning("Ошибка чтения настроек, сброс на умолчания")
                 self.set_defaults()
@@ -943,7 +854,7 @@ class Launcher(QMainWindow):
         self.resolution_height = DEFAULT_SETTINGS["resolution_height"]
         self.custom_background = DEFAULT_SETTINGS["custom_background"]
         self.ely_by_skins = DEFAULT_SETTINGS["ely_by_skins"]
-        self.ui_theme = DEFAULT_SETTINGS["ui_theme"]
+        self.auto_check_updates = DEFAULT_SETTINGS["auto_check_updates"]
 
     def save_settings(self) -> None:
         data = {
@@ -963,7 +874,7 @@ class Launcher(QMainWindow):
             "resolution_height": self.resolution_height,
             "custom_background": self.custom_background,
             "ely_by_skins": self.ely_by_skins,
-            "ui_theme": self.ui_theme,
+            "auto_check_updates": self.auto_check_updates,
         }
         try:
             with open(SETTINGS_FILE, "w", encoding="utf-8") as f:
@@ -988,7 +899,7 @@ class Launcher(QMainWindow):
             custom_background=self.custom_background,
             ely_by_skins=self.ely_by_skins,
             current_version=self.ui.VersionComboBox.currentData(),
-            ui_theme=self.ui_theme,
+            auto_check_updates=self.auto_check_updates,
         )
         if dialog.exec() == QDialog.DialogCode.Accepted:
             cfg = dialog.get_settings()
@@ -998,7 +909,6 @@ class Launcher(QMainWindow):
                 self.last_version = current_version
 
             old_bg = self.custom_background
-            old_theme = self.ui_theme
             self.version_filters = cfg["filters"]
             self.allocated_memory = cfg["memory"]
             self.show_console_opt = cfg["show_console"]
@@ -1013,7 +923,7 @@ class Launcher(QMainWindow):
             self.resolution_height = cfg["resolution_height"]
             self.custom_background = cfg["custom_background"]
             self.ely_by_skins = cfg["ely_by_skins"]
-            self.ui_theme = cfg.get("ui_theme", "modern")
+            self.auto_check_updates = cfg.get("auto_check_updates", True)
 
             self._apply_language()
             self._detect_java()
@@ -1024,13 +934,6 @@ class Launcher(QMainWindow):
 
             if cfg["filters"] != dialog.old_filters:
                 self.load_versions()
-
-            if old_theme != self.ui_theme:
-                QMessageBox.information(
-                    self,
-                    t("ui_theme", self._lang).rstrip(":"),
-                    t("theme_restart_notice", self._lang),
-                )
 
     # ==============================================================
     # Запуск игры
