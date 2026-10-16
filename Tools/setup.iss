@@ -28,7 +28,7 @@ Source: "mclovin.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "folder.png"; DestDir: "{app}"; Flags: ignoreversion
 Source: "github.png"; DestDir: "{app}"; Flags: ignoreversion
 Source: "lang\*"; DestDir: "{app}\lang"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "Backgrounds\*"; DestDir: "{app}\Backgrounds"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "background.jpg"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\LightLauncher"; Filename: "{app}\LightLauncher.exe"; WorkingDir: "{app}"
