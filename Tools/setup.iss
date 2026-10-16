@@ -27,7 +27,6 @@ Source: "main.dist\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs cre
 Source: "mclovin.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "folder.png"; DestDir: "{app}"; Flags: ignoreversion
 Source: "github.png"; DestDir: "{app}"; Flags: ignoreversion
-Source: "background.png"; DestDir: "{app}"; Flags: ignoreversion
 Source: "lang\*"; DestDir: "{app}\lang"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "Backgrounds\*"; DestDir: "{app}\Backgrounds"; Flags: ignoreversion recursesubdirs createallsubdirs
 
