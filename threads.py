@@ -31,7 +31,11 @@ class BackgroundLoader(QThread):
                 self.loaded.emit(img)
                 return
 
-        for name in ("background.png", "background.jpg"):
+        for name in (
+            os.path.join("Backgrounds", "01_Night_Mountains.jpg"),
+            "background.jpg",
+            "background.png",
+        ):
             path = os.path.join(get_exe_dir(), name)
             if os.path.exists(path):
                 img = QImage(path)
