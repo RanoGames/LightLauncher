@@ -15,6 +15,7 @@
   - Сжатие UPX: **отключено** (сжатие выполняется через Inno Setup)
 - **Инсталлятор Inno Setup:**
   - Файл: `installer_output\LightLauncher-setup-v0.52.exe`
-  - Размер: ~32.6 МБ (включает все 8 HD фонов, runtime и зависимости)
+  - Размер: ~21.8 МБ (22 925 304 байт) — оптимизировано, упакован только `01_Night_Mountains.jpg`
   - Сжатие: `lzma2/ultra64`
+- **Фон по умолчанию:** `Backgrounds\01_Night_Mountains.jpg` (старый фон background.png удалён)
 - **Git:** Все файлы закоммичены отдельными коммитами в ветку `main`.
